@@ -1069,7 +1069,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def open_url(self):
         print("Opening")
-        url = QtCore.QUrl('https://github.com/milicevickatarina/3D-Gastro-CT')
+        url = QtCore.QUrl('https://github.com/milicevickatarina/3D-Gastro-CT-Extended')
         if not QtGui.QDesktopServices.openUrl(url):
             QtGui.QMessageBox.warning(self, 'Open Url', 'Could not open url')
         
