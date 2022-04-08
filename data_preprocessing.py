@@ -30,42 +30,43 @@ def data_preprocessing_2(img, main_dir, phase_name):
     fixed_image_path = os.path.join(main_dir, 'data/native_phase_preprocessed.mha')
     fixed_image =  sitk.ReadImage(fixed_image_path, sitk.sitkFloat32)
     
-    if (filt_img.GetSize() == fixed_image.GetSize()): # Checking if there is need for corregistration
-        # Image saving
-        sitk.WriteImage(filt_img, main_dir + "/data/" + phase_name + "_phase_preprocessed.mha")
+    # if (filt_img.GetSize() == fixed_image.GetSize()): # Skipping corregistration if possible
+    #     # Image saving
+    #     sitk.WriteImage(filt_img, main_dir + "/data/" + phase_name + "_phase_preprocessed.mha")
         
-    else:
-        # Corregistration
-        moving_image = sitk.Cast(filt_img, sitk.sitkFloat32)
-        initial_transform = sitk.CenteredTransformInitializer(fixed_image, 
-                                                              moving_image, 
-                                                              sitk.Euler3DTransform(), 
-                                                              sitk.CenteredTransformInitializerFilter.GEOMETRY)
-        moving_resampled = sitk.Resample(moving_image, fixed_image, initial_transform, sitk.sitkLinear, 0.0, moving_image.GetPixelID())
-        registration_method = sitk.ImageRegistrationMethod()
+    # else:
         
-        # Similarity metric settings
-        registration_method.SetMetricAsMattesMutualInformation(numberOfHistogramBins=50)
-        registration_method.SetMetricSamplingStrategy(registration_method.RANDOM)
-        registration_method.SetMetricSamplingPercentage(0.01)
-        registration_method.SetInterpolator(sitk.sitkLinear)
-        
-        # Optimizer settings
-        registration_method.SetOptimizerAsGradientDescent(learningRate=1.0, numberOfIterations=100, convergenceMinimumValue=1e-6, convergenceWindowSize=10)
-        registration_method.SetOptimizerScalesFromPhysicalShift()
-        
-        # Setup for the multi-resolution framework         
-        registration_method.SetShrinkFactorsPerLevel(shrinkFactors = [4,2,1])
-        registration_method.SetSmoothingSigmasPerLevel(smoothingSigmas=[2,1,0])
-        registration_method.SmoothingSigmasAreSpecifiedInPhysicalUnitsOn()
-        registration_method.SetInitialTransform(initial_transform, inPlace=False)
-        
-        final_transform = registration_method.Execute(sitk.Cast(fixed_image, sitk.sitkFloat32), 
-                                                        sitk.Cast(moving_image, sitk.sitkFloat32))
-        moving_resampled = sitk.Resample(moving_image, fixed_image, final_transform, sitk.sitkLinear, 0.0, moving_image.GetPixelID())
-        casted = sitk.Cast(moving_resampled, sitk.sitkInt16)
-        # Image saving
-        sitk.WriteImage(casted, os.path.join(main_dir, "data/" + phase_name + "_phase_preprocessed.mha"))
+    # Corregistration
+    moving_image = sitk.Cast(filt_img, sitk.sitkFloat32)
+    initial_transform = sitk.CenteredTransformInitializer(fixed_image, 
+                                                          moving_image, 
+                                                          sitk.Euler3DTransform(), 
+                                                          sitk.CenteredTransformInitializerFilter.GEOMETRY)
+    moving_resampled = sitk.Resample(moving_image, fixed_image, initial_transform, sitk.sitkLinear, 0.0, moving_image.GetPixelID())
+    registration_method = sitk.ImageRegistrationMethod()
+    
+    # Similarity metric settings
+    registration_method.SetMetricAsMattesMutualInformation(numberOfHistogramBins=50)
+    registration_method.SetMetricSamplingStrategy(registration_method.RANDOM)
+    registration_method.SetMetricSamplingPercentage(0.01)
+    registration_method.SetInterpolator(sitk.sitkLinear)
+    
+    # Optimizer settings
+    registration_method.SetOptimizerAsGradientDescent(learningRate=1.0, numberOfIterations=100, convergenceMinimumValue=1e-6, convergenceWindowSize=10)
+    registration_method.SetOptimizerScalesFromPhysicalShift()
+    
+    # Setup for the multi-resolution framework         
+    registration_method.SetShrinkFactorsPerLevel(shrinkFactors = [4,2,1])
+    registration_method.SetSmoothingSigmasPerLevel(smoothingSigmas= [2,1,0])
+    registration_method.SmoothingSigmasAreSpecifiedInPhysicalUnitsOn()
+    registration_method.SetInitialTransform(initial_transform, inPlace=False)
+    
+    final_transform = registration_method.Execute(sitk.Cast(fixed_image, sitk.sitkFloat32), 
+                                                    sitk.Cast(moving_image, sitk.sitkFloat32))
+    moving_resampled = sitk.Resample(moving_image, fixed_image, final_transform, sitk.sitkLinear, 0.0, moving_image.GetPixelID())
+    casted = sitk.Cast(moving_resampled, sitk.sitkInt16)
+    # Image saving
+    sitk.WriteImage(casted, os.path.join(main_dir, "data/" + phase_name + "_phase_preprocessed.mha"))
 
 
 def main(arg, main_dir):

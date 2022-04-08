@@ -141,55 +141,58 @@ class heartSegmTab(QtWidgets.QWidget):
         self.bz.setPlaceholderText("0")
         self.bz.move(1660, 580)
         
-        # First slice picture
-        img = sitk.ReadImage(work_dir + "/data/vein_phase_preprocessed.mha")
-        first_slice = img[:,:,0]
-        sc = MplCanvas(self, width=5, height=4, dpi=100)
-        sc.axes.imshow(sitk.GetArrayViewFromImage(first_slice), cmap='gray')
-        sc.axes.set(xlabel='', ylabel='',
-                title='First slice (choosing heart bounds)')
-        toolbar = NavigationToolbar(sc, self)
-        self.fixwidget = QtWidgets.QWidget(self)
-        self.layout  = QtWidgets.QGridLayout()
-        self.layout.addWidget(toolbar, 0, 0)
-        self.layout.addWidget(sc)
-        self.fixwidget.setLayout(self.layout) 
-        height = self.fixwidget.sizeHint().height()
-        width = self.fixwidget.sizeHint().width()
-        xpos, ypos = 250, 150
-        self.fixwidget.setGeometry(QtCore.QRect(xpos, ypos, width, height)) 
-        
-        # Whole series representation
-        sc2 = MplCanvas(self, width=5, height=4, dpi=100)
-        img_array = sitk.GetArrayFromImage(img)
-        X_tran = np.transpose(img_array, (1,2,0))
-        color_map='gray'
-        title = 'Axial slices' #'Slices (choosing tridimensional heart region bounds)'
-        self.tracker = IndexTracker(sc2.axes, X_tran, color_map, title)
-        sc2.fig.canvas.mpl_connect('scroll_event', self.tracker.onscroll)
-        toolbar2 = NavigationToolbar(sc2, self)
-        self.fixwidget2 = QtWidgets.QWidget(self)
-        self.layout2  = QtWidgets.QGridLayout()
-        self.layout2.addWidget(toolbar2, 0, 0)
-        self.layout2.addWidget(sc2) 
-        self.fixwidget2.setLayout(self.layout2) 
-        height2 = self.fixwidget2.sizeHint().height()
-        width2 = self.fixwidget2.sizeHint().width()
-        xpos2, ypos2 = 1100, 150
-        self.fixwidget2.setGeometry(QtCore.QRect(xpos2, ypos2, width2, height2)) 
-        
-        self.pushButton_firstSliceSegm = QtWidgets.QPushButton("Check first slice segmentation", self)
-        self.pushButton_firstSliceSegm.resize(200, 40)
-        self.pushButton_firstSliceSegm.move(450, 850)
-        
-        self.pushButton_heartBox = QtWidgets.QPushButton("Check borders", self)
-        self.pushButton_heartBox.resize(120, 30)
-        self.pushButton_heartBox.move(1660, 660)
-        
-        self.pushButton_segm = QtWidgets.QPushButton("Segmentation...", self)
-        self.pushButton_segm.resize(200, 40)
-        self.pushButton_segm.move(1300, 850)
-        
+        try:
+            # First slice picture
+            img = sitk.ReadImage(work_dir + "/data/vein_phase_preprocessed.mha")
+            first_slice = img[:,:,0]
+            sc = MplCanvas(self, width=5, height=4, dpi=100)
+            sc.axes.imshow(sitk.GetArrayViewFromImage(first_slice), cmap='gray')
+            sc.axes.set(xlabel='', ylabel='',
+                    title='First slice (choosing heart bounds)')
+            toolbar = NavigationToolbar(sc, self)
+            self.fixwidget = QtWidgets.QWidget(self)
+            self.layout  = QtWidgets.QGridLayout()
+            self.layout.addWidget(toolbar, 0, 0)
+            self.layout.addWidget(sc)
+            self.fixwidget.setLayout(self.layout) 
+            height = self.fixwidget.sizeHint().height()
+            width = self.fixwidget.sizeHint().width()
+            xpos, ypos = 250, 150
+            self.fixwidget.setGeometry(QtCore.QRect(xpos, ypos, width, height)) 
+            
+            # Whole series representation
+            sc2 = MplCanvas(self, width=5, height=4, dpi=100)
+            img_array = sitk.GetArrayFromImage(img)
+            X_tran = np.transpose(img_array, (1,2,0))
+            color_map='gray'
+            title = 'Axial slices' #'Slices (choosing tridimensional heart region bounds)'
+            self.tracker = IndexTracker(sc2.axes, X_tran, color_map, title)
+            sc2.fig.canvas.mpl_connect('scroll_event', self.tracker.onscroll)
+            toolbar2 = NavigationToolbar(sc2, self)
+            self.fixwidget2 = QtWidgets.QWidget(self)
+            self.layout2  = QtWidgets.QGridLayout()
+            self.layout2.addWidget(toolbar2, 0, 0)
+            self.layout2.addWidget(sc2) 
+            self.fixwidget2.setLayout(self.layout2) 
+            height2 = self.fixwidget2.sizeHint().height()
+            width2 = self.fixwidget2.sizeHint().width()
+            xpos2, ypos2 = 1100, 150
+            self.fixwidget2.setGeometry(QtCore.QRect(xpos2, ypos2, width2, height2)) 
+            
+            self.pushButton_firstSliceSegm = QtWidgets.QPushButton("Check first slice segmentation", self)
+            self.pushButton_firstSliceSegm.resize(200, 40)
+            self.pushButton_firstSliceSegm.move(450, 850)
+            
+            self.pushButton_heartBox = QtWidgets.QPushButton("Check borders", self)
+            self.pushButton_heartBox.resize(120, 30)
+            self.pushButton_heartBox.move(1660, 660)
+            
+            self.pushButton_segm = QtWidgets.QPushButton("Segmentation...", self)
+            self.pushButton_segm.resize(200, 40)
+            self.pushButton_segm.move(1300, 850)
+        except:
+            info_message(self, "There is no vein phase. Proceed to segment bones and stone.")
+            
         self.pushButton_next = QtWidgets.QPushButton("next (Segmentation of bones)", self)
         self.pushButton_next.resize(210, 40)
         self.pushButton_next.move(1700, 950)
@@ -623,9 +626,12 @@ class segmWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("Segmentation: Heart")
         self.setCentralWidget(self.ToolTab)
 
-        self.ToolTab.pushButton_firstSliceSegm.clicked.connect(self.show_first_slice_segm)
-        self.ToolTab.pushButton_heartBox.clicked.connect(self.show_heart_box)
-        self.ToolTab.pushButton_segm.clicked.connect(self.heart_segm_starter)
+        try:
+            self.ToolTab.pushButton_firstSliceSegm.clicked.connect(self.show_first_slice_segm)
+            self.ToolTab.pushButton_heartBox.clicked.connect(self.show_heart_box)
+            self.ToolTab.pushButton_segm.clicked.connect(self.heart_segm_starter)
+        except:
+            print("Idemoo")
         self.ToolTab.pushButton_next.clicked.connect(self.start_bones_segm)
         
         self.show()
@@ -1069,7 +1075,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def open_url(self):
         print("Opening")
-        url = QtCore.QUrl('https://github.com/milicevickatarina/3D-Gastro-CT')
+        url = QtCore.QUrl('https://github.com/milicevickatarina/3D-Gastro-CT-Extended')
         if not QtGui.QDesktopServices.openUrl(url):
             QtGui.QMessageBox.warning(self, 'Open Url', 'Could not open url')
         

@@ -20,7 +20,7 @@ def main(work_dir):
     stone_sitk = sitk.ReadImage(work_dir + "/segmentation results/stone.mhd")
     stone_sitk.CopyInformation(img_del)
     
-    thres_del = 135
+    thres_del = 130
     phase_del = img_del > thres_del
     
     # phase_del_sitk = sitk.Cast(phase_del_sitk, sitk.sitkUInt8)
@@ -40,7 +40,13 @@ def main(work_dir):
     stone_sitk.SetOrigin(img_del.GetOrigin())
     phase_del = phase_del-bones_del
     
-    img_all = phase_del + bones_del*2 + stone_sitk*5 # *4
+    cleaned_thresh_img = sitk.BinaryOpeningByReconstruction(phase_del, [5, 5, 5])
+    phase_del = sitk.BinaryClosingByReconstruction(cleaned_thresh_img, [5, 5, 5])
+    
+    phase_del = phase_del - phase_del*stone_sitk
+    img_all = phase_del + bones_del*2 + stone_sitk*6 # *4
+    # img_all2 = np.where(img_all==5, 6, img_all)
+    
     all_array = sitk.GetArrayFromImage(img_all)
     
     # Rotation of axial slices around y-axis

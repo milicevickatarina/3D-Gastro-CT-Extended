@@ -35,8 +35,8 @@ def main(main_dir, thres = 118, thres2 = 250):
     bones_sitk = sitk.GetImageFromArray(bones)
     bones_sitk.SetSpacing(img.GetSpacing())
     bones_sitk = sitk.Cast(bones_sitk, sitk.sitkUInt8)
-    cleaned_thresh_img = sitk.BinaryOpeningByReconstruction(bones_sitk, [3, 3, 3])
-    bones_sitk = sitk.BinaryClosingByReconstruction(cleaned_thresh_img, [3, 3, 3])
+    cleaned_thresh_img = sitk.BinaryOpeningByReconstruction(bones_sitk, [5, 5, 5])
+    bones_sitk = sitk.BinaryClosingByReconstruction(cleaned_thresh_img, [5, 5, 5])
     
     segm_dir = os.path.join(main_dir, "segmentation results")
     if not os.path.exists(segm_dir):
