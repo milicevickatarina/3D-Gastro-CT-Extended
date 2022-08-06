@@ -1,4 +1,6 @@
-# 3D_Gastro_CT_Extended
-Tool for three-dimensional segmentation and visualization of abdominal computed tomography scans with new option for excretory phase segmentation
+# 3D Gastro CT Extended
+**Three-dimensional segmentation and visualization tool for processing of abdominal computed tomography scans**
+
+**>>Extended**: New option for segmentation of excretory phase with kidney calcifications
 
 <img src="pictures/introduction.png" width="800">
