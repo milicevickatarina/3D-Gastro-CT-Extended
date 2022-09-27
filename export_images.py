@@ -50,13 +50,14 @@ def main(fileName, main_dir):
         appendPolydata.AddInputConnection(normals.GetOutputPort())
 
     # Save to stl
-    stlWriter = vtk.vtkSTLWriter()
-    stlWriter.SetInputConnection(appendPolydata.GetOutputPort())
-    stlWriter.SetFileName(generate_file_name(exp_dir,'.stl'))
-    stlWriter.Write()
+    # stlWriter = vtk.vtkSTLWriter()
+    # stlWriter.SetInputConnection(appendPolydata.GetOutputPort())
+    # stlWriter.SetFileName(generate_file_name(exp_dir,'.stl'))
+    # stlWriter.Write()
 
     renderer.GetActiveCamera().Elevation(-90)
     renderer.ResetCamera()
+    renderer.GetActiveCamera().Zoom(2)
     renderer.ResetCameraClippingRange()
     renderer.SetBackground(colors.GetColor3d("white"))
 

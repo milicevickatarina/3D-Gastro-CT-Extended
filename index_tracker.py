@@ -7,15 +7,17 @@ class for scrolling slices in matplotlib.pyplot
 
 
 class IndexTracker(object):
-    def __init__(self, ax, X, color_map, title):
+    def __init__(self, fig, ax, X, color_map, title):
         self.ax = ax
-        ax.set_title(title + '\nuse scroll wheel to navigate images')
+        # ax.set_title(title + '\nuse scroll wheel to navigate images')
 
         self.X = X
+        self.fig = fig
         rows, cols, self.slices = X.shape
         self.ind = self.slices//2
 
-        self.im = ax.imshow(self.X[:, :, self.ind],cmap = color_map)
+        self.im = ax.imshow(self.X[:, :, self.ind], cmap = color_map)
+        ax.set_axis_off()
         self.update()
 
     def onscroll(self, event):
@@ -25,20 +27,11 @@ class IndexTracker(object):
         else:
             self.ind = (self.ind - 1) % self.slices
         self.update()
-    
-    def keyPressEvent(self, event):
-        print("Event FIRED")
-
-    def onfooUp(self):
-        print("up")
-
-    def on_fooDown(self, event):
-        print("down")
-
 
     def update(self):
         self.im.set_data(self.X[:, :, self.ind])
         self.ax.set_ylabel('slice %s' % self.ind)
+        self.fig.canvas.set_window_title('Series display: '+'slice %s' % self.ind)
         self.im.axes.figure.canvas.draw()
         
     def __del__(self):

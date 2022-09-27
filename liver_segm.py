@@ -23,7 +23,6 @@ def show_hist(main_dir):
 
 
 def main(main_dir, thres_min = 120, thres_max = 126):
-    print("Segmentacija zapocela")
     
     img = sitk.ReadImage(main_dir + "/data/vein_phase_preprocessed.mha")
     img_array = sitk.GetArrayFromImage(img)
@@ -36,18 +35,12 @@ def main(main_dir, thres_min = 120, thres_max = 126):
         heart_array = sitk.GetArrayFromImage(heart_sitk)
         bones_sitk = sitk.ReadImage(main_dir + "/segmentation results/bones.mhd")
         bones_array = sitk.GetArrayFromImage(bones_sitk)
-        print("1")
         heart_spine = heart_array | bones_array
-        print("2")
         only_liver_and_spleen = np.where(heart_spine==0, img_array, 0)
-        print("3")
         bin_im = (only_liver_and_spleen<thres_max)*(only_liver_and_spleen>thres_min)
-        print("4")
         liver = np.zeros(only_liver_and_spleen.shape, dtype = 'uint8')
-        print("5")
         for z in range(z_top, z_bottom+1):
             liver[z,:,:] = bin_im[z,:,:]
-        print("6")
         liver_sitk = sitk.GetImageFromArray(liver)
         liver_sitk.SetSpacing(img.GetSpacing())
         cleaned_thresh_img = sitk.BinaryOpeningByReconstruction(liver_sitk, [4, 4, 4])
@@ -60,7 +53,6 @@ def main(main_dir, thres_min = 120, thres_max = 126):
             os.makedirs(segm_dir)
         
         sitk.WriteImage(liver_sitk, segm_dir + "/liver_and_spleen.mhd")
-        print("Segmentacija zavrsena")
         return 1
     except:
         return 0

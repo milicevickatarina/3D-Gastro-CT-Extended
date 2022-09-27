@@ -20,33 +20,29 @@ def main(work_dir):
     stone_sitk = sitk.ReadImage(work_dir + "/segmentation results/stone.mhd")
     stone_sitk.CopyInformation(img_del)
     
-    thres_del = 130
+    thres_del = 135
     phase_del = img_del > thres_del
-    
-    # phase_del_sitk = sitk.Cast(phase_del_sitk, sitk.sitkUInt8)
+
     cleaned_thresh_img = sitk.BinaryOpeningByReconstruction(phase_del, [5, 5, 5])
     phase_del = sitk.BinaryClosingByReconstruction(cleaned_thresh_img, [5, 5, 5])
+
+    save_dir = os.path.join(work_dir, "delayed phase segmentation results")
+    # Commented savings are for visualization of algorithm steps
+    # sitk.WriteImage(phase_del, os.path.join(save_dir, "phase_del.mhd"))
     
     dil_filter =  sitk.BinaryDilateImageFilter()
     dil_filter.SetKernelRadius(3)
     
     bones_roi = dil_filter.Execute(bones)
-    
     bones_roi = dil_filter.Execute(bones_roi)
-    bones_roi.SetSpacing(img_del.GetSpacing())
-    bones_roi.SetOrigin(img_del.GetOrigin())
     bones_del = phase_del * bones_roi
 
     stone_sitk.SetOrigin(img_del.GetOrigin())
     phase_del = phase_del-bones_del
-    
-    cleaned_thresh_img = sitk.BinaryOpeningByReconstruction(phase_del, [5, 5, 5])
-    phase_del = sitk.BinaryClosingByReconstruction(cleaned_thresh_img, [5, 5, 5])
-    
-    phase_del = phase_del - phase_del*stone_sitk
-    img_all = phase_del + bones_del*2 + stone_sitk*6 # *4
-    # img_all2 = np.where(img_all==5, 6, img_all)
-    
+
+    # sitk.WriteImage(bones_del, os.path.join(save_dir, "phase_del_bones.mhd"))
+    # sitk.WriteImage(phase_del, os.path.join(save_dir, "phase_del_kidney.mhd"))
+    img_all = phase_del + bones_del*2 + stone_sitk*5
     all_array = sitk.GetArrayFromImage(img_all)
     
     # Rotation of axial slices around y-axis

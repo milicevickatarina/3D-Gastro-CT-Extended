@@ -12,7 +12,7 @@ import numpy as np
 
 def main(main_dir):
     
-    img = sitk.ReadImage(main_dir + "/data/vein_phase_preprocessed.mha")
+    img = sitk.ReadImage(main_dir + "/data/native_phase_preprocessed.mha")
     img_array = sitk.GetArrayFromImage(img)
     # Merging segmentation results
     try:
@@ -52,7 +52,6 @@ def main(main_dir):
     X_for_mirror = np.transpose(whole_segm, (0,2,1))
     X_mirrored = X_for_mirror[::-1]
     whole_segm_mirror = np.transpose(X_mirrored,(0,2,1))
-    # whole_segm_mirror = whole_segm # Bez rotacije
 
     # Image saving
     whole_segm_sitk = sitk.GetImageFromArray(whole_segm_mirror)

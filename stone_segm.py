@@ -13,14 +13,13 @@ import os
 
 
 def main(main_dir, phaseIdx, thres=250, thres2=256):
-    print("Segm kamena pocela")
     
     if phaseIdx==0:
-        img = sitk.ReadImage(main_dir + "/data/delayed_phase_preprocessed.mha")
-    elif phaseIdx==1:
         img = sitk.ReadImage(main_dir + "/data/native_phase_preprocessed.mha")
+    elif phaseIdx==1:
+        img = sitk.ReadImage(main_dir + "/data/delayed_phase_preprocessed.mha")
     else:
-        print("Greska! Indeks faze nije ni 0 ni 1!")
+        print("Error! Phase index isn't valid!")
     img_array = sitk.GetArrayFromImage(img)
     
     try:
@@ -36,7 +35,7 @@ def main(main_dir, phaseIdx, thres=250, thres2=256):
     for z in range(z_top, z_bottom+1):
         stone[z,:,:] = bin_im[z,:,:]
     stone_sitk = sitk.GetImageFromArray(stone)
-    stone_sitk.SetSpacing(img.GetSpacing())
+    stone_sitk.CopyInformation(img)
     stone_sitk = sitk.Cast(stone_sitk, sitk.sitkUInt8)
     cleaned_thresh_img = sitk.BinaryOpeningByReconstruction(stone_sitk, [2, 2, 2])
     stone_sitk = sitk.BinaryClosingByReconstruction(cleaned_thresh_img, [2, 2, 2])

@@ -38,7 +38,7 @@ def main(fileName, main_dir):
     'liver and spleen',
     'kidneys',
     'stone',
-    'veins'
+    'stone2'
 ]
 
     for i in range(0, len(organs)):
@@ -52,13 +52,14 @@ def main(fileName, main_dir):
         appendPolydata.AddInputConnection(normals.GetOutputPort())
 
     # Save to stl
-    stlWriter = vtk.vtkSTLWriter()
-    stlWriter.SetInputConnection(appendPolydata.GetOutputPort())
-    stlWriter.SetFileName(generate_file_name(exp_dir,'.stl'))
-    stlWriter.Write()
+    # stlWriter = vtk.vtkSTLWriter()
+    # stlWriter.SetInputConnection(appendPolydata.GetOutputPort())
+    # stlWriter.SetFileName(generate_file_name(exp_dir,'.stl'))
+    # stlWriter.Write()
 
     renderer.GetActiveCamera().Elevation(-90)
     renderer.ResetCamera()
+    renderer.GetActiveCamera().Zoom(2)
     renderer.ResetCameraClippingRange()
     renderer.SetBackground(colors.GetColor3d("white"))
 
@@ -102,20 +103,20 @@ def CreateColorLut():
     colorLut.SetTableValue(2, colors.GetColor4d("wheat"))
     colorLut.SetTableValue(3, colors.GetColor4d("darkred"))
     colorLut.SetTableValue(4, colors.GetColor4d("cadmium_orange"))
-    colorLut.SetTableValue(5, colors.GetColor4d("lightslategray"))
-    colorLut.SetTableValue(6, colors.GetColor4d("blue"))
+    colorLut.SetTableValue(5, colors.GetColor4d("lightslategray")) #lightslategray
+    colorLut.SetTableValue(6, colors.GetColor4d("lightslategray"))
     
     return colorLut
 
 
 def CreateOrgansMap():
     organMap = dict()
-    organMap["heart"] = [1, 0.4]
+    organMap["heart"] = [1, 0.3]
     organMap["bones"] = [2, 1.0]
     organMap["liver and spleen"] = [3, 0.4]
     organMap["kidneys"] = [4, 0.4]
     organMap["stone"] = [5, 1.0]
-    organMap["veins"] = [6, 1.0]
+    organMap["stone2"] = [6, 1.0]
 
     return organMap
 

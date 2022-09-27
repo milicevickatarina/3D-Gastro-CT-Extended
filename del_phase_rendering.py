@@ -84,8 +84,8 @@ def CreateColorLut():
     colorLut.SetTableValue(2, colors.GetColor4d("wheat"))
     colorLut.SetTableValue(3, colors.GetColor4d("darkred"))
     colorLut.SetTableValue(4, colors.GetColor4d("cadmium_orange"))
-    colorLut.SetTableValue(5, colors.GetColor4d("blue"))
-    colorLut.SetTableValue(6, colors.GetColor4d("blue"))
+    colorLut.SetTableValue(5, colors.GetColor4d("lightslategray"))
+    colorLut.SetTableValue(6, colors.GetColor4d("lightslategray"))
 
     return colorLut
 

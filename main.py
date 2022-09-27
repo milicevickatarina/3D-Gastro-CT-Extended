@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on May 2021 (3D Gastro CT Tool)
-    - Link to GitHub repository: https://github.com/milicevickatarina/3D-Gastro-CT
+    - Link to GitHub repository: https://github.com/milicevickatarina/3D-Gastro-CT-Extended'
 Edited on Feb 2021 (3D Gastro CT Tool Ex)
     - Extended version:
         - Segmentation of delayed phase added
@@ -201,9 +201,9 @@ class heartSegmTab(QtWidgets.QWidget):
 class bonesSegmTab(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(bonesSegmTab, self).__init__(parent)
-        self.lbl = QtWidgets.QLabel(self)
-        self.lbl.setText("For lower threshold choose value at the end of last (most right) peak\nand for upper choose some value close to 256 (e.g. 250).")
-        self.lbl.move(50, 50)
+        # self.lbl = QtWidgets.QLabel(self)
+        # self.lbl.setText("For lower threshold choose value at the end of last (most right) peak\nand for upper choose some value close to 256 (e.g. 250).")
+        # self.lbl.move(50, 50)
         
         # Lower threshold
         self.lbl_lt = QtWidgets.QLabel(self)
@@ -248,8 +248,8 @@ class bonesSegmTab(QtWidgets.QWidget):
         self.pushButton_segm.move(775, 750)
         
         self.pushButton_next = QtWidgets.QPushButton('next (Segmentation of liver and spleen)', self)
-        self.pushButton_next.resize(210, 40)
-        self.pushButton_next.move(1700, 950)
+        self.pushButton_next.resize(240, 50)
+        self.pushButton_next.move(1660, 910)
 
 class liverSegmTab(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -278,28 +278,30 @@ class liverSegmTab(QtWidgets.QWidget):
         self.ut.setPlaceholderText("0")
         self.ut.move(1300, 300)
         
-        # Histogram picture
-        import liver_segm
-        sc = MplCanvas(self, width=5, height=4, dpi=100)
-
-        hist = liver_segm.show_hist(work_dir)
-        sc.axes.plot(hist)
-        sc.axes.set(xlabel='', ylabel='',
-                title='Whole volume histogram')
-        toolbar = NavigationToolbar(sc, self)
-        self.fixwidget = QtWidgets.QWidget(self)
-        self.layout  = QtWidgets.QGridLayout()
-        self.layout.addWidget(toolbar, 0, 0)
-        self.layout.addWidget(sc)
-        self.fixwidget.setLayout(self.layout) 
-        height = self.fixwidget.sizeHint().height()
-        width = self.fixwidget.sizeHint().width()
-        xpos, ypos = 600, 100
-        self.fixwidget.setGeometry(QtCore.QRect(xpos, ypos, width, height)) 
-        
-        self.pushButton_segm = QtWidgets.QPushButton("Segmentation...", self)
-        self.pushButton_segm.resize(200, 40)
-        self.pushButton_segm.move(775, 750)
+        try:
+            # Histogram picture
+            import liver_segm
+            sc = MplCanvas(self, width=5, height=4, dpi=100)
+    
+            hist = liver_segm.show_hist(work_dir)
+            sc.axes.plot(hist)
+            sc.axes.set(xlabel='', ylabel='',
+                    title='Whole volume histogram')
+            toolbar = NavigationToolbar(sc, self)
+            self.fixwidget = QtWidgets.QWidget(self)
+            self.layout  = QtWidgets.QGridLayout()
+            self.layout.addWidget(toolbar, 0, 0)
+            self.layout.addWidget(sc)
+            self.fixwidget.setLayout(self.layout) 
+            height = self.fixwidget.sizeHint().height()
+            width = self.fixwidget.sizeHint().width()
+            xpos, ypos = 600, 100
+            self.fixwidget.setGeometry(QtCore.QRect(xpos, ypos, width, height))
+            self.pushButton_segm = QtWidgets.QPushButton("Segmentation...", self)
+            self.pushButton_segm.resize(200, 40)
+            self.pushButton_segm.move(775, 750)
+        except:
+            info_message(self, "There is no vein phase. Proceed to segment stone.")
         
         self.pushButton_next = QtWidgets.QPushButton('next (Segmentation of kidneys)', self)
         self.pushButton_next.resize(210, 40)
@@ -468,71 +470,74 @@ class kidneysSegmTab(QtWidgets.QWidget):
         self.ut2.setPlaceholderText("0")
         self.ut2.move(1800, 650)
         
-        # Whole series representation
-        sc2 = MplCanvas(self, width=5, height=4, dpi=100)
-        img = sitk.ReadImage(work_dir + "/data/vein_phase_preprocessed.mha")
-        img_array = sitk.GetArrayFromImage(img)
-        X_tran = np.transpose(img_array, (1,2,0))
-        color_map='gray'
-        title = 'Axial slices' # 'Slices (choosing tridimensional kidneys regions bounds)'
-        self.tracker = IndexTracker(sc2.axes, X_tran, color_map, title)
-        sc2.fig.canvas.mpl_connect('scroll_event', self.tracker.onscroll)
-        toolbar2 = NavigationToolbar(sc2, self)
-        self.fixwidget2 = QtWidgets.QWidget(self)
-        self.layout2  = QtWidgets.QGridLayout()
-        self.layout2.addWidget(toolbar2, 0, 0)
-        self.layout2.addWidget(sc2) 
-        self.fixwidget2.setLayout(self.layout2) 
-        height2 = self.fixwidget2.sizeHint().height()
-        width2 = self.fixwidget2.sizeHint().width()
-        xpos2, ypos2 = 700, 10
-        self.fixwidget2.setGeometry(QtCore.QRect(xpos2, ypos2, width2, height2)) 
-        
-        # Histogram of right kidney
-        self.sc = MplCanvas(self, width=5, height=4, dpi=100)
-        self.sc.axes.set(xlabel='', ylabel='',
-                title='Right kidney region histogram')
-        self.toolbar = NavigationToolbar(self.sc, self)
-        self.fixwidget = QtWidgets.QWidget(self)
-        self.layout  = QtWidgets.QGridLayout()
-        self.layout.addWidget(self.toolbar, 0, 0)
-        self.layout.addWidget(self.sc)
-        self.fixwidget.setLayout(self.layout) 
-        height = self.fixwidget.sizeHint().height()
-        width = self.fixwidget.sizeHint().width()
-        xpos, ypos = 150, 420
-        self.fixwidget.setGeometry(QtCore.QRect(xpos, ypos, width, height)) 
-        
-         # Histogram of left kidney
-        self.sc3 = MplCanvas(self, width=5, height=4, dpi=100)
-        self.sc3.axes.set(xlabel='', ylabel='',
-                title='Left kidney region histogram')
-        toolbar3 = NavigationToolbar(self.sc3, self)
-        self.fixwidget3 = QtWidgets.QWidget(self)
-        self.layout3  = QtWidgets.QGridLayout()
-        self.layout3.addWidget(toolbar3, 0, 0)
-        self.layout3.addWidget(self.sc3)
-        self.fixwidget3.setLayout(self.layout3) 
-        height3 = self.fixwidget3.sizeHint().height()
-        width3 = self.fixwidget3.sizeHint().width()
-        xpos3, ypos3 = 1250, 420
-        self.fixwidget3.setGeometry(QtCore.QRect(xpos3, ypos3, width3, height3))
-        
-        self.pushButton_showHist = QtWidgets.QPushButton("Check borders and show histogram", self)
-        self.pushButton_showHist.resize(190, 30)
-        self.pushButton_showHist.move(280, 350)
-
-        self.pushButton_showHist2 = QtWidgets.QPushButton("Check borders and show histogram", self)
-        self.pushButton_showHist2.resize(190, 30)
-        self.pushButton_showHist2.move(1380, 350) 
-        
-        self.pushButton_segm = QtWidgets.QPushButton("Right Kidney Segmentation...", self)
-        self.pushButton_segm.resize(200, 40)
-        self.pushButton_segm.move(325, 900)
-        
-        self.pushButton_segm2 = QtWidgets.QPushButton("Left Kidney Segmentation...", self)
-        self.pushButton_segm2.resize(200, 40)
-        self.pushButton_segm2.move(1425, 900)
+        try:
+            # Whole series representation
+            sc2 = MplCanvas(self, width=5, height=4, dpi=100)
+            img = sitk.ReadImage(work_dir + "/data/vein_phase_preprocessed.mha")
+            img_array = sitk.GetArrayFromImage(img)
+            X_tran = np.transpose(img_array, (1,2,0))
+            color_map='gray'
+            title = 'Axial slices' # 'Slices (choosing tridimensional kidneys regions bounds)'
+            self.tracker = IndexTracker(sc2.axes, X_tran, color_map, title)
+            sc2.fig.canvas.mpl_connect('scroll_event', self.tracker.onscroll)
+            toolbar2 = NavigationToolbar(sc2, self)
+            self.fixwidget2 = QtWidgets.QWidget(self)
+            self.layout2  = QtWidgets.QGridLayout()
+            self.layout2.addWidget(toolbar2, 0, 0)
+            self.layout2.addWidget(sc2) 
+            self.fixwidget2.setLayout(self.layout2) 
+            height2 = self.fixwidget2.sizeHint().height()
+            width2 = self.fixwidget2.sizeHint().width()
+            xpos2, ypos2 = 700, 10
+            self.fixwidget2.setGeometry(QtCore.QRect(xpos2, ypos2, width2, height2)) 
+            
+            # Histogram of right kidney
+            self.sc = MplCanvas(self, width=5, height=4, dpi=100)
+            self.sc.axes.set(xlabel='', ylabel='',
+                    title='Right kidney region histogram')
+            self.toolbar = NavigationToolbar(self.sc, self)
+            self.fixwidget = QtWidgets.QWidget(self)
+            self.layout  = QtWidgets.QGridLayout()
+            self.layout.addWidget(self.toolbar, 0, 0)
+            self.layout.addWidget(self.sc)
+            self.fixwidget.setLayout(self.layout) 
+            height = self.fixwidget.sizeHint().height()
+            width = self.fixwidget.sizeHint().width()
+            xpos, ypos = 150, 420
+            self.fixwidget.setGeometry(QtCore.QRect(xpos, ypos, width, height)) 
+            
+             # Histogram of left kidney
+            self.sc3 = MplCanvas(self, width=5, height=4, dpi=100)
+            self.sc3.axes.set(xlabel='', ylabel='',
+                    title='Left kidney region histogram')
+            toolbar3 = NavigationToolbar(self.sc3, self)
+            self.fixwidget3 = QtWidgets.QWidget(self)
+            self.layout3  = QtWidgets.QGridLayout()
+            self.layout3.addWidget(toolbar3, 0, 0)
+            self.layout3.addWidget(self.sc3)
+            self.fixwidget3.setLayout(self.layout3) 
+            height3 = self.fixwidget3.sizeHint().height()
+            width3 = self.fixwidget3.sizeHint().width()
+            xpos3, ypos3 = 1250, 420
+            self.fixwidget3.setGeometry(QtCore.QRect(xpos3, ypos3, width3, height3))
+            
+            self.pushButton_showHist = QtWidgets.QPushButton("Check borders and show histogram", self)
+            self.pushButton_showHist.resize(190, 30)
+            self.pushButton_showHist.move(280, 350)
+    
+            self.pushButton_showHist2 = QtWidgets.QPushButton("Check borders and show histogram", self)
+            self.pushButton_showHist2.resize(190, 30)
+            self.pushButton_showHist2.move(1380, 350) 
+            
+            self.pushButton_segm = QtWidgets.QPushButton("Right Kidney Segmentation...", self)
+            self.pushButton_segm.resize(200, 40)
+            self.pushButton_segm.move(325, 900)
+            
+            self.pushButton_segm2 = QtWidgets.QPushButton("Left Kidney Segmentation...", self)
+            self.pushButton_segm2.resize(200, 40)
+            self.pushButton_segm2.move(1425, 900)
+        except:
+            info_message(self, "There is no vein phase. Proceed to segment stone.")
         
         self.pushButton_next = QtWidgets.QPushButton('next (Segmentation of additional objects)', self)
         self.pushButton_next.resize(215, 40)
@@ -567,31 +572,34 @@ class stoneSegmTab(QtWidgets.QWidget):
         self.ut.setText("256")
         self.ut.move(1300, 300)
         
-        # Histogram picture
-        import liver_segm
-        sc = MplCanvas(self, width=5, height=4, dpi=100)
-        hist = liver_segm.show_hist(work_dir)
-        sc.axes.plot(hist)
-        sc.axes.set(xlabel='', ylabel='',
-                title='Whole volume histogram')
-        toolbar = NavigationToolbar(sc, self)
-        self.fixwidget = QtWidgets.QWidget(self)
-        self.layout  = QtWidgets.QGridLayout()
-        self.layout.addWidget(toolbar, 0, 0)
-        self.layout.addWidget(sc)
-        self.fixwidget.setLayout(self.layout)
-        height = self.fixwidget.sizeHint().height()
-        width = self.fixwidget.sizeHint().width()
-        xpos, ypos = 600, 100
-        self.fixwidget.setGeometry(QtCore.QRect(xpos, ypos, width, height))
+        try:
+            # Histogram picture
+            import bones_segm
+            sc = MplCanvas(self, width=5, height=4, dpi=100)
+            hist = bones_segm.show_hist(work_dir)
+            sc.axes.plot(hist)
+            sc.axes.set(xlabel='', ylabel='',
+                    title='Whole volume histogram')
+            toolbar = NavigationToolbar(sc, self)
+            self.fixwidget = QtWidgets.QWidget(self)
+            self.layout  = QtWidgets.QGridLayout()
+            self.layout.addWidget(toolbar, 0, 0)
+            self.layout.addWidget(sc)
+            self.fixwidget.setLayout(self.layout)
+            height = self.fixwidget.sizeHint().height()
+            width = self.fixwidget.sizeHint().width()
+            xpos, ypos = 600, 100
+            self.fixwidget.setGeometry(QtCore.QRect(xpos, ypos, width, height))
+        except:
+            info_message(self, "There is no vein phase. Show another phase.")
         
         # Choose phase for stone segmentation
         self.lbl_ph = QtWidgets.QLabel(self)
-        self.lbl_ph.setText('Choose desired phase for segmentation (delayed phase is default)')
+        self.lbl_ph.setText('Choose desired phase for segmentation (native phase is default)')
         self.lbl_ph.move(780, 635)
         self.phaseChoice = QtWidgets.QComboBox(self)
-        self.phaseChoice.addItem("delayed phase")
         self.phaseChoice.addItem("native phase")
+        self.phaseChoice.addItem("delayed phase")
         self.phaseChoice.resize(150, 30)
         self.phaseChoice.move(780, 655)
         
@@ -630,9 +638,9 @@ class segmWindow(QtWidgets.QMainWindow):
             self.ToolTab.pushButton_firstSliceSegm.clicked.connect(self.show_first_slice_segm)
             self.ToolTab.pushButton_heartBox.clicked.connect(self.show_heart_box)
             self.ToolTab.pushButton_segm.clicked.connect(self.heart_segm_starter)
+            self.ToolTab.pushButton_next.clicked.connect(self.start_bones_segm)
         except:
-            print("Idemoo")
-        self.ToolTab.pushButton_next.clicked.connect(self.start_bones_segm)
+            self.ToolTab.pushButton_next.clicked.connect(self.start_bones_segm)
         
         self.show()
     
@@ -719,11 +727,13 @@ class segmWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("Segmentation: Liver and spleen")
         self.setCentralWidget(self.ToolTab)
         
-        self.ToolTab.pushButton_segm.clicked.connect(self.liver_segm_starter)
-        self.ToolTab.pushButton_next.clicked.connect(self.start_kidneys_segm)
-        
-        self.statusBar.showMessage('Choose appropriate parameters to perform segmentation of liver and spleen.')
-        
+        try:
+            self.ToolTab.pushButton_segm.clicked.connect(self.liver_segm_starter)
+            self.ToolTab.pushButton_next.clicked.connect(self.start_kidneys_segm)
+            self.statusBar.showMessage('Choose appropriate parameters to perform segmentation of liver and spleen.')
+        except:
+            self.ToolTab.pushButton_next.clicked.connect(self.start_kidneys_segm)
+            
         self.show()
         
     def liver_segm_starter(self):
@@ -748,13 +758,15 @@ class segmWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("Segmentation: Kidneys")
         self.setCentralWidget(self.ToolTab)
         
-        self.ToolTab.pushButton_showHist.clicked.connect(lambda: self.kidneys_segm_starter(0))
-        self.ToolTab.pushButton_showHist2.clicked.connect(lambda: self.kidneys_segm_starter(1))
-        self.ToolTab.pushButton_segm.clicked.connect(lambda: self.kidneys_segm_starter(2))
-        self.ToolTab.pushButton_segm2.clicked.connect(lambda: self.kidneys_segm_starter(3))
-        self.ToolTab.pushButton_next.clicked.connect(self.start_stone_segm)
-        
-        self.statusBar.showMessage('Choose appropriate parameters to perform segmentation of kidneys.')
+        try:
+            self.ToolTab.pushButton_showHist.clicked.connect(lambda: self.kidneys_segm_starter(0))
+            self.ToolTab.pushButton_showHist2.clicked.connect(lambda: self.kidneys_segm_starter(1))
+            self.ToolTab.pushButton_segm.clicked.connect(lambda: self.kidneys_segm_starter(2))
+            self.ToolTab.pushButton_segm2.clicked.connect(lambda: self.kidneys_segm_starter(3))
+            self.ToolTab.pushButton_next.clicked.connect(self.start_stone_segm)
+            self.statusBar.showMessage('Choose appropriate parameters to perform segmentation of kidneys.')
+        except:
+            self.ToolTab.pushButton_next.clicked.connect(self.start_stone_segm) 
 
         self.show()
         
@@ -762,7 +774,6 @@ class segmWindow(QtWidgets.QMainWindow):
         import kidneys_segm
         try:
             if flag==2:
-                print("Desni")
                 a = int(self.ToolTab.lt.text())
                 b = int(self.ToolTab.ut.text())
                 c = int(self.ToolTab.xl.text())
@@ -781,7 +792,6 @@ class segmWindow(QtWidgets.QMainWindow):
                     popup_message(self, "Heart, bones, liver and spleen must be first segmented!")
                     self.statusBar.showMessage('Segmentation of right kidney failed.')
             elif flag==3:
-                print("Levi")
                 a = int(self.ToolTab.lt2.text())
                 b = int(self.ToolTab.ut2.text())
                 c = int(self.ToolTab.xl2.text())
@@ -800,7 +810,6 @@ class segmWindow(QtWidgets.QMainWindow):
                     popup_message(self, "Heart, bones, liver and spleen must be first segmented!")
                     self.statusBar.showMessage('Segmentation of left kidney failed.')
             elif flag==0:
-                print("Histogram")
                 a = int(self.ToolTab.xl.text())
                 b = int(self.ToolTab.xr.text())
                 c = int(self.ToolTab.yt.text())
@@ -825,7 +834,6 @@ class segmWindow(QtWidgets.QMainWindow):
                 else:
                     popup_message(self, "Heart, bones and liver and spleen must be first segmented!")
             else:
-                print("Histogram2")
                 a = int(self.ToolTab.xl2.text())
                 b = int(self.ToolTab.xr2.text())
                 c = int(self.ToolTab.yt2.text())
@@ -869,7 +877,6 @@ class segmWindow(QtWidgets.QMainWindow):
             a = int(self.ToolTab.lt.text())
             b = int(self.ToolTab.ut.text())
             ph = self.ToolTab.phaseChoice.currentIndex()
-            print(ph)
             self.statusBar.showMessage('Segmentation of stone/additional objects has started. Please wait...')
             flag = stone_segm.main(work_dir, ph, a, b)
             if not flag:
@@ -958,30 +965,30 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.left_frame.setLineWidth(1)
         self.left_frame.setFixedWidth(270)
         self.left_frame.setFixedHeight(400)
-        self.left_frame.move(70, 110)
+        self.left_frame.move(100, 110)
         
         self.left_label = QtWidgets.QLabel(self.centralwidget)
         self.left_label.setText('Organ Segmentation')
         self.left_label.setStyleSheet('QLabel {color : rgb(53, 50, 47); }')
         self.left_label.setFont(QtGui.QFont('Times', 11))
-        self.left_label.move(90, 115)
+        self.left_label.move(120, 115)
         
         self.toolButton_segm = QtWidgets.QToolButton(self.centralwidget)
-        self.toolButton_segm.setGeometry(QtCore.QRect(120, 160, 151, 61))
+        self.toolButton_segm.setGeometry(QtCore.QRect(160, 160, 151, 61))
         self.toolButton_segm.setStyleSheet('QToolButton {background-color: lightgrey; color: #35322f;}')
         self.toolButton_segm.setCheckable(False)
         self.toolButton_segm.setObjectName("toolButton_segm")
         self.toolButton_segm.clicked.connect(self.start_segm)
         
         self.toolButton_render = QtWidgets.QToolButton(self.centralwidget)
-        self.toolButton_render.setGeometry(QtCore.QRect(120, 260, 151, 61))
+        self.toolButton_render.setGeometry(QtCore.QRect(160, 260, 151, 61))
         self.toolButton_render.setStyleSheet('QToolButton {background-color: lightgrey; color: #35322f;}')
         self.toolButton_render.setCheckable(False)
         self.toolButton_render.setObjectName("toolButton_render")
         self.toolButton_render.clicked.connect(self.render)
         
         self.toolButton_export = QtWidgets.QToolButton(self.centralwidget)
-        self.toolButton_export.setGeometry(QtCore.QRect(120, 360, 151, 61))
+        self.toolButton_export.setGeometry(QtCore.QRect(160, 360, 151, 61))
         self.toolButton_export.setStyleSheet('QToolButton {background-color: lightgrey; color: #35322f;}')
         self.toolButton_export.setCheckable(False)
         self.toolButton_export.setObjectName("toolButton_render")
@@ -994,30 +1001,30 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.right_frame.setLineWidth(1)
         self.right_frame.setFixedWidth(270)
         self.right_frame.setFixedHeight(400)
-        self.right_frame.move(360, 110)
+        self.right_frame.move(415, 110)
         
         self.right_label = QtWidgets.QLabel(self.centralwidget)
         self.right_label.setText('Delayed Phase Segmentation')
         self.right_label.setStyleSheet('QLabel {color : rgb(53, 50, 47); }')
         self.right_label.setFont(QtGui.QFont('Times', 11))
-        self.right_label.move(380, 115)
+        self.right_label.move(435, 115)
     
         self.toolButton_segm2 = QtWidgets.QToolButton(self.centralwidget)
-        self.toolButton_segm2.setGeometry(QtCore.QRect(410, 160, 151, 61))
+        self.toolButton_segm2.setGeometry(QtCore.QRect(475, 160, 151, 61))
         self.toolButton_segm2.setStyleSheet('QToolButton {background-color: lightgrey; color: #35322f;}')
         self.toolButton_segm2.setCheckable(False)
         self.toolButton_segm2.setObjectName("toolButton_segm")
         self.toolButton_segm2.clicked.connect(self.start_segm2)
         
         self.toolButton_render2 = QtWidgets.QToolButton(self.centralwidget)
-        self.toolButton_render2.setGeometry(QtCore.QRect(410, 260, 151, 61))
+        self.toolButton_render2.setGeometry(QtCore.QRect(475, 260, 151, 61))
         self.toolButton_render2.setStyleSheet('QToolButton {background-color: lightgrey; color: #35322f;}')
         self.toolButton_render2.setCheckable(False)
         self.toolButton_render2.setObjectName("toolButton_render")
         self.toolButton_render2.clicked.connect(self.render2)
         
         self.toolButton_export2 = QtWidgets.QToolButton(self.centralwidget)
-        self.toolButton_export2.setGeometry(QtCore.QRect(410, 360, 151, 61))
+        self.toolButton_export2.setGeometry(QtCore.QRect(475, 360, 151, 61))
         self.toolButton_export2.setStyleSheet('QToolButton {background-color: lightgrey; color: #35322f;}')
         self.toolButton_export2.setCheckable(False)
         self.toolButton_export2.setObjectName("toolButton_render")
@@ -1074,7 +1081,6 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         print(event.key())
 
     def open_url(self):
-        print("Opening")
         url = QtCore.QUrl('https://github.com/milicevickatarina/3D-Gastro-CT-Extended')
         if not QtGui.QDesktopServices.openUrl(url):
             QtGui.QMessageBox.warning(self, 'Open Url', 'Could not open url')
@@ -1090,7 +1096,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             X_tran = np.transpose(img_array, (1,2,0))
             color_map='gray'
             title = 'Axial slices'
-            self.tracker = IndexTracker(ax, X_tran, color_map, title)
+            self.tracker = IndexTracker(fig, ax, X_tran, color_map, title)
             fig.canvas.mpl_connect('scroll_event', self.tracker.onscroll)
             fig.canvas.mpl_connect('close_event', self.tracker.on_close)
             plt.show()
@@ -1105,12 +1111,9 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             MainWindow.statusBar().showMessage('"' + work_dir + '" is chosen for work directory. You can now proceed to next steps.')
     
     def scan_data(self):
-        print("uslo")
         if work_dir!="":
              import scan_data_processing
              scanDir = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Scanned Data Directory")
-             print(scanDir)
-             print("Odradilo")
              if scanDir!="":
                  MainWindow.statusBar().showMessage('"' + scanDir + '" is chosen. Loading has started. Please wait...')
              flag = scan_data_processing.main(scanDir, work_dir)
@@ -1130,12 +1133,21 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             if fileDir!="":
                 MainWindow.statusBar().showMessage('Processing has started. Please wait...')
                 flag = data_preprocessing.main(fileDir, work_dir)
-                if not flag:
-                    info_message(self, "Preprocessing is successfully finished. All series are now ready for segmentation.")
+                if 0 == flag:
+                    info_message(self, "Preprocessing is successfully finished. All series are now ready for segmentation processes.")
                     MainWindow.statusBar().showMessage('All series are now ready for segmentation.')
+                elif 2 == flag:
+                    info_message(self, "Preprocessing is finished. Series are ready for Delayed Phase Segmentation.",
+                                  "Vein phase is missing for Organ segmentation.")
+                    MainWindow.statusBar().showMessage('It is not possible to execute Organ segmentation.')
+                elif 3 == flag:
+                    info_message(self, "Preprocessing is finished. Series are ready for Organ segmentation.",
+                                  "Delayed phase is missing for Delayed Phase Segmentation.")
+                    MainWindow.statusBar().showMessage('It is not possible to execute Delayed Phase Segmentation.')
                 else:
-                    popup_message(self, "Chosen directory is not appropriate!")
-                    MainWindow.statusBar().showMessage('Choose appropriate directory of CT phases.')
+                    popup_message(self, "Neccessary native phase is missing!",
+                                  "It is not possible to execute segmentation processes.")
+                    MainWindow.statusBar().showMessage('It is not possible to execute segmentation processes.')
             else:
                 popup_message(self, "Chosen directory is not appropriate!")
                 MainWindow.statusBar().showMessage('Choose appropriate directory of CT phases.')

@@ -34,13 +34,11 @@ def main(fileDir, saveDir):
         phase_name_key = "0008|103e"
         phase_name = reader.GetMetaData(phase_name_key)
         print(f"({phase_name_key}) = = \"{phase_name}\"")
-        time_key = "0008|0032"
-        try:
-            time = reader.GetMetaData(time_key)
-            print(f"({time_key}) = = \"{time}\"")
-        except:
-            print("There's no time key!")
-         
+        phase_name_key = "0008|0032"
+        phase_name = reader.GetMetaData(phase_name_key)
+        print(f"({phase_name_key}) = = \"{phase_name}\"")
+               
+        
         image = imageReader.Execute()
         size = image.GetSize()
         print("Image size:", size[0], size[1], size[2])

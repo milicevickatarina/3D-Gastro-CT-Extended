@@ -26,17 +26,13 @@ def data_preprocessing_2(img, main_dir, phase_name):
     # Median filtering
     med_filt = sitk.MedianImageFilter()
     med_filt.SetRadius(1)
-    filt_img = med_filt.Execute(img_255) # new_img
+    filt_img = med_filt.Execute(img_255)
     fixed_image_path = os.path.join(main_dir, 'data/native_phase_preprocessed.mha')
     fixed_image =  sitk.ReadImage(fixed_image_path, sitk.sitkFloat32)
+  
     
-    # if (filt_img.GetSize() == fixed_image.GetSize()): # Skipping corregistration if possible
-    #     # Image saving
-    #     sitk.WriteImage(filt_img, main_dir + "/data/" + phase_name + "_phase_preprocessed.mha")
-        
-    # else:
-        
     # Corregistration
+    
     moving_image = sitk.Cast(filt_img, sitk.sitkFloat32)
     initial_transform = sitk.CenteredTransformInitializer(fixed_image, 
                                                           moving_image, 
@@ -65,17 +61,20 @@ def data_preprocessing_2(img, main_dir, phase_name):
                                                     sitk.Cast(moving_image, sitk.sitkFloat32))
     moving_resampled = sitk.Resample(moving_image, fixed_image, final_transform, sitk.sitkLinear, 0.0, moving_image.GetPixelID())
     casted = sitk.Cast(moving_resampled, sitk.sitkInt16)
+    
+    # # Query why the optimizer terminated
+    # print(f"Final metric value: {registration_method.GetMetricValue()}")
+    # print(f"Optimizer's stopping condition, {registration_method.GetOptimizerStopConditionDescription()}")
+    
     # Image saving
     sitk.WriteImage(casted, os.path.join(main_dir, "data/" + phase_name + "_phase_preprocessed.mha"))
-
 
 def main(arg, main_dir):
 
     try:
         img_nat = sitk.ReadImage(arg + "/native.mha")
     except:
-            print("Necessary native phase is missing!")
-            return 2
+        return 1
     
     # Rescaling intensity
     Hmin = -548
@@ -96,27 +95,30 @@ def main(arg, main_dir):
     
     flag = 0;
     
-    # Preprocessing of the rest of the phases with corregistration towards native phase if needed
-    try:
-        img_art = sitk.ReadImage(arg + "/arterial.mha")
-        data_preprocessing_2(img_art, main_dir, "arterial")
-    except:
-        flag = 1;
-        print("Arterial phase is missing!")
+    # Preprocessing of the rest of the phases with corregistration towards native phase
+    
+    # Arterial phase is not necessary for the segmentation processes
+    # try:
+    #     img_art = sitk.ReadImage(arg + "/arterial.mha")
+    #     data_preprocessing_2(img_art, main_dir, "arterial")
+    # except:
+    #     flag = 0;
+    #     print("Arterial phase is missing!")
         
     try:
         img_vein = sitk.ReadImage(arg + "/vein.mha")
         data_preprocessing_2(img_vein, main_dir, "vein")
     except:
-        flag = 1;
+        flag = 2;
     
     try:
         img_del = sitk.ReadImage(arg + "/delayed.mha")
         data_preprocessing_2(img_del, main_dir, "delayed")
     except:
-        flag = 2;
+        flag = 3;
     
         
     return flag # 0 for completely sucessful processing
-                # 1 for missing unnecessary phases
-                # 2 for missing necessary phases
+                # 1 for missing native phase which is neccessary for both segmentation algorithms
+                # 2 for missing vein phase
+                # 3 for missing delayed phase

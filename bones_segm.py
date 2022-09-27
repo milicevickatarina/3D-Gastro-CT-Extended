@@ -24,7 +24,6 @@ def show_hist(main_dir):
 
 
 def main(main_dir, thres = 118, thres2 = 250):
-    img = sitk.ReadImage(main_dir + "/data/vein_phase_preprocessed.mha")
     img_native = sitk.ReadImage(main_dir + "/data/native_phase_preprocessed.mha")
     img_native_array = sitk.GetArrayFromImage(img_native)
     
@@ -33,7 +32,7 @@ def main(main_dir, thres = 118, thres2 = 250):
     bones = bin_im1 & bin_im2
     
     bones_sitk = sitk.GetImageFromArray(bones)
-    bones_sitk.SetSpacing(img.GetSpacing())
+    bones_sitk.CopyInformation(img_native)
     bones_sitk = sitk.Cast(bones_sitk, sitk.sitkUInt8)
     cleaned_thresh_img = sitk.BinaryOpeningByReconstruction(bones_sitk, [5, 5, 5])
     bones_sitk = sitk.BinaryClosingByReconstruction(cleaned_thresh_img, [5, 5, 5])

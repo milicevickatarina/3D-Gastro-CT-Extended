@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 """
 Created on January 2022
@@ -19,13 +20,12 @@ def main(fileDir, workDir):
     if not os.path.exists(seriesDir):
         os.makedirs(seriesDir)
     
+    # Reading all files whether they are in a parent directory or in nested directories
     flag = 0
     for root, dirs, files in os.walk(fileDir):
         if dirs == []:
             cur = read_all_dicom_series.main(root, seriesDir)
             flag = max(cur, flag)
-    
-    # flag = read_all_dicom_series.main(fileDir, seriesDir)
 
     if flag:
         return 1
